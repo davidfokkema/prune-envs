@@ -2,7 +2,7 @@ import subprocess
 import threading
 
 from rich.progress import BarColumn, Progress, TextColumn
-from textual.app import App, ComposeResult
+from textual.app import App, ComposeResult, Screen
 from textual.widgets import Footer, Label, ListItem, ListView, Static
 
 
@@ -15,6 +15,9 @@ class EnvironmentsList(ListView):
 
 
 class Environment(ListItem):
+
+    delete_thread = None
+
     def __init__(self, env_name: str) -> None:
         super().__init__()
         self.env_name = env_name
@@ -33,7 +36,7 @@ class Environment(ListItem):
             self._progress.add_task("Deleting...", total=None)
 
             self.delete_thread = threading.Thread(
-                target=subprocess.run, kwargs=dict(args=["sleep", "15"])
+                target=subprocess.run, kwargs=dict(args=["sleep", "5"])
             )
             self.delete_thread.start()
 
@@ -44,6 +47,15 @@ class Environment(ListItem):
         if not self.delete_thread.is_alive():
             self.query_one("#status").update("Deleted.")
             self.timer.stop_no_wait()
+
+    def prepare_quit(self):
+        if self.delete_thread:
+            self.delete_thread.join()
+
+
+class QuitScreen(Screen):
+    def compose(self) -> ComposeResult:
+        yield Static("Waiting on running cleanups...", id="quit_dialog")
 
 
 class ListViewExample(App):
@@ -62,6 +74,13 @@ class ListViewExample(App):
 
     def on_mount(self):
         self.screen.focus_next()
+
+    async def action_quit(self) -> None:
+        await self.push_screen(QuitScreen())
+        for env in self.query("Environment.delete"):
+            print(f"Waiting on environment {env.env_name}...")
+            env.prepare_quit()
+        return await super().action_quit()
 
 
 if __name__ == "__main__":

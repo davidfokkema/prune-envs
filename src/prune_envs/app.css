@@ -2,6 +2,14 @@ Screen {
     align: center middle;
 }
 
+#quit_dialog {
+    background: $accent-darken-3;
+    width: auto;
+    text-align: center;
+    padding: 1 4;
+    text-style: bold;
+}
+
 EnvironmentsList {
     width: 100%;
     height: auto;
