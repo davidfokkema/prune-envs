@@ -14,6 +14,9 @@ class ListViewExample(App):
         )
         yield Footer()
 
+    def on_mount(self):
+        self.screen.focus_next()
+
 
 if __name__ == "__main__":
     app = ListViewExample()
