@@ -2,13 +2,15 @@ Screen {
     align: center middle;
 }
 
-ListView {
+EnvironmentsList {
     width: 30;
     height: auto;
     margin: 2 2;
 }
 
-Label {
+
+Environment {
+    layout: horizontal;
     padding: 1 2;
 }
 

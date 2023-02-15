@@ -1,14 +1,27 @@
 from textual.app import App, ComposeResult
-from textual.widgets import ListView, ListItem, Label, Footer
+from textual.widgets import ListView, ListItem, Label, Footer, Static
+import threading
 
 
 class EnvironmentsList(ListView):
 
-    BINDINGS = [("d", "toggle_deletion", "Delete/Undelete")]
+    BINDINGS = [("q", "quit", "Quit"), ("d", "mark_deletion", "Toggle Delete/Undelete")]
 
-    def action_toggle_deletion(self):
-        self.highlighted_child.toggle_class("delete")
-        print(self.highlighted_child.classes)
+    def action_mark_deletion(self):
+        self.highlighted_child.delete()
+
+
+class Environment(ListItem):
+    def __init__(self, env_name: str) -> None:
+        super().__init__()
+        self.env_name = env_name
+
+    def compose(self) -> ComposeResult:
+        yield Label(self.env_name)
+        yield Static(id="status")
+
+    def delete(self):
+        self.add_class("delete")
 
 
 class ListViewExample(App):
@@ -17,9 +30,9 @@ class ListViewExample(App):
 
     def compose(self) -> ComposeResult:
         yield EnvironmentsList(
-            ListItem(Label("One")),
-            ListItem(Label("Two")),
-            ListItem(Label("Three")),
+            Environment("One"),
+            Environment("Two"),
+            Environment("Three"),
         )
         yield Footer()
 
