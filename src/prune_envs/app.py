@@ -65,20 +65,26 @@ class ListViewExample(App):
     BINDINGS = [("q", "quit", "Quit")]
 
     def compose(self) -> ComposeResult:
+        envs = self.get_environments()
         yield EnvironmentsList(
-            Environment("One"),
-            Environment("Two"),
-            Environment("Three"),
+            *[Environment(env) for env in envs],
         )
         yield Footer()
 
-    def on_mount(self):
+    def on_mount(self) -> None:
         self.screen.focus_next()
 
     async def action_quit(self) -> None:
         await self.push_screen(QuitScreen())
         self.query_one("EnvironmentsList").remove()
         return await super().action_quit()
+
+    def get_environments(self) -> list[str]:
+        process = subprocess.run("conda env list", shell=True, capture_output=True)
+        lines = process.stdout.decode().splitlines()
+        envs = [line.split()[0] for line in lines if line and line[0] != "#"]
+        envs.remove("base")
+        return envs
 
 
 if __name__ == "__main__":
