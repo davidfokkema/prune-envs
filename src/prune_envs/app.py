@@ -8,7 +8,7 @@ from textual.widgets import Footer, Label, ListItem, ListView, Static
 
 class EnvironmentsList(ListView):
 
-    BINDINGS = [("q", "quit", "Quit"), ("d", "mark_deletion", "Toggle Delete/Undelete")]
+    BINDINGS = [("d", "mark_deletion", "Toggle Delete/Undelete")]
 
     def action_mark_deletion(self) -> None:
         self.highlighted_child.delete()
@@ -24,19 +24,20 @@ class Environment(ListItem):
         yield Static(id="status")
 
     def delete(self) -> None:
-        self.add_class("delete")
-        self._progress = Progress(
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(bar_width=None),
-        )
-        self._progress.add_task("Deleting...", total=None)
+        if not "delete" in self.classes:
+            self.add_class("delete")
+            self._progress = Progress(
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(bar_width=None),
+            )
+            self._progress.add_task("Deleting...", total=None)
 
-        self.delete_thread = threading.Thread(
-            target=subprocess.run, kwargs=dict(args=["sleep", "5"])
-        )
-        self.delete_thread.start()
+            self.delete_thread = threading.Thread(
+                target=subprocess.run, kwargs=dict(args=["sleep", "15"])
+            )
+            self.delete_thread.start()
 
-        self.timer = self.set_interval(1 / 60, self.update_progress)
+            self.timer = self.set_interval(1 / 60, self.update_progress)
 
     def update_progress(self) -> None:
         self.query_one("#status").update(self._progress)
@@ -48,6 +49,8 @@ class Environment(ListItem):
 class ListViewExample(App):
 
     CSS_PATH = "app.css"
+
+    BINDINGS = [("q", "quit", "Quit")]
 
     def compose(self) -> ComposeResult:
         yield EnvironmentsList(
