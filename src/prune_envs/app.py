@@ -36,7 +36,7 @@ class Environment(ListItem):
         self.counts += 1
         if self.counts > 180:
             self.query_one("#status").update("Deleted.")
-            self.timer.stop()
+            self.timer.stop_no_wait()
 
 
 class ListViewExample(App):
