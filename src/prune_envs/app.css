@@ -3,15 +3,24 @@ Screen {
 }
 
 EnvironmentsList {
-    width: 30;
+    width: 100%;
     height: auto;
     margin: 2 2;
 }
 
 
 Environment {
+    width: 1fr;
     layout: horizontal;
     padding: 1 2;
+}
+
+#env_name {
+    width: 1fr;
+}
+
+#status {
+    width: 2fr;
 }
 
 .delete {
