@@ -1,6 +1,9 @@
+import subprocess
+import threading
+
+from rich.progress import BarColumn, Progress, TextColumn
 from textual.app import App, ComposeResult
-from textual.widgets import ListView, ListItem, Label, Footer, Static
-from rich.progress import Progress, TextColumn, BarColumn
+from textual.widgets import Footer, Label, ListItem, ListView, Static
 
 
 class EnvironmentsList(ListView):
@@ -12,8 +15,6 @@ class EnvironmentsList(ListView):
 
 
 class Environment(ListItem):
-    counts = 0
-
     def __init__(self, env_name: str) -> None:
         super().__init__()
         self.env_name = env_name
@@ -29,12 +30,17 @@ class Environment(ListItem):
             BarColumn(bar_width=None),
         )
         self._progress.add_task("Deleting...", total=None)
+
+        self.delete_thread = threading.Thread(
+            target=subprocess.run, kwargs=dict(args=["sleep", "5"])
+        )
+        self.delete_thread.start()
+
         self.timer = self.set_interval(1 / 60, self.update_progress)
 
     def update_progress(self) -> None:
         self.query_one("#status").update(self._progress)
-        self.counts += 1
-        if self.counts > 180:
+        if not self.delete_thread.is_alive():
             self.query_one("#status").update("Deleted.")
             self.timer.stop_no_wait()
 
