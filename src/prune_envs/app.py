@@ -48,7 +48,7 @@ class Environment(ListItem):
             self.query_one("#status").update("Deleted.")
             self.timer.stop_no_wait()
 
-    def prepare_quit(self):
+    def on_unmount(self):
         if self.delete_thread:
             self.delete_thread.join()
 
@@ -77,9 +77,7 @@ class ListViewExample(App):
 
     async def action_quit(self) -> None:
         await self.push_screen(QuitScreen())
-        for env in self.query("Environment.delete"):
-            print(f"Waiting on environment {env.env_name}...")
-            env.prepare_quit()
+        self.query_one("EnvironmentsList").remove()
         return await super().action_quit()
 
 
