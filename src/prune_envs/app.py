@@ -61,7 +61,7 @@ class QuitScreen(Screen):
         yield Static("Waiting on running cleanups...", id="quit_dialog")
 
 
-class ListViewExample(App):
+class PruneEnvironments(App):
 
     CSS_PATH = "app.css"
 
@@ -91,5 +91,5 @@ class ListViewExample(App):
 
 
 if __name__ == "__main__":
-    app = ListViewExample()
+    app = PruneEnvironments()
     app.run()
