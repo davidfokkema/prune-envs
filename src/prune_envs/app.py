@@ -1,4 +1,3 @@
-import pathlib
 import subprocess
 import threading
 import time
@@ -6,8 +5,10 @@ import time
 from rich.spinner import Spinner
 from textual.app import App, ComposeResult, Screen
 from textual.containers import Horizontal
-from textual.widgets import Footer, Label, ListItem, ListView, Static
 from textual.css.query import NoMatches
+from textual.widgets import Footer, Label, ListItem, ListView, Static
+
+from prune_envs import conda
 
 
 class EnvironmentsList(ListView):
@@ -43,7 +44,8 @@ class EnvironmentItem(ListItem):
             self.query_one("#status_msg").update("Deleting")
 
             self.delete_thread = threading.Thread(
-                target=subprocess.run, kwargs=dict(args=["sleep", "5"])
+                target=conda.remove_environment,
+                args=(self.env_name,),
             )
             self.delete_thread.start()
             self.timer = self.set_interval(1 / 60, self.update_progress)
@@ -82,7 +84,7 @@ class PruneEnvironments(App):
 
     async def on_compose(self):
         await self.push_screen(InitScreen())
-        self.envs = self.get_environments()
+        self.envs = conda.get_environments()
         self.pop_screen()
 
     def compose(self) -> ComposeResult:
@@ -98,17 +100,6 @@ class PruneEnvironments(App):
         await self.push_screen(QuitScreen())
         self.query_one("EnvironmentsList").remove()
         return await super().action_quit()
-
-    def get_environments(self) -> list[tuple]:
-        process = subprocess.run("conda env list", shell=True, capture_output=True)
-        envs = []
-        for line in process.stdout.decode().splitlines():
-            if line and line[0] != "#":
-                env_name, *_, env_path = line.split()
-                if env_name != "base":
-                    ctime = pathlib.Path(env_path).stat().st_ctime
-                    envs.append((env_name, ctime))
-        return envs
 
 
 if __name__ == "__main__":
