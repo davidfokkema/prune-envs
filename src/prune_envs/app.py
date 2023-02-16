@@ -3,8 +3,9 @@ import subprocess
 import threading
 import time
 
-from rich.progress import BarColumn, Progress, TextColumn
+from rich.spinner import Spinner
 from textual.app import App, ComposeResult, Screen
+from textual.containers import Horizontal
 from textual.widgets import Footer, Label, ListItem, ListView, Static
 
 
@@ -22,6 +23,7 @@ class EnvironmentsList(ListView):
 class EnvironmentItem(ListItem):
 
     delete_thread = None
+    _spinner = Spinner(name="simpleDots")
 
     def __init__(self, env: tuple) -> None:
         super().__init__()
@@ -32,28 +34,24 @@ class EnvironmentItem(ListItem):
         yield Label(
             time.strftime("%b %d, %Y", time.localtime(self.env_ctime)), id="env_ctime"
         )
-        yield Static(id="status")
+        yield Horizontal(Static(id="status_msg"), Static(id="spinner"), id="status")
 
     def delete(self) -> None:
         if not "delete" in self.classes:
             self.add_class("delete")
-            self._progress = Progress(
-                TextColumn("[progress.description]{task.description}"),
-                BarColumn(bar_width=None),
-            )
-            self._progress.add_task("Deleting...", total=None)
+            self.query_one("#status_msg").update("Deleting")
 
             self.delete_thread = threading.Thread(
                 target=subprocess.run, kwargs=dict(args=["sleep", "5"])
             )
             self.delete_thread.start()
-
             self.timer = self.set_interval(1 / 60, self.update_progress)
 
     def update_progress(self) -> None:
-        self.query_one("#status").update(self._progress)
+        self.query_one("#spinner").update(self._spinner)
         if not self.delete_thread.is_alive():
-            self.query_one("#status").update("Deleted.")
+            self.query_one("#spinner").update()
+            self.query_one("#status_msg").update("Deleted")
             self.timer.stop_no_wait()
 
     def on_unmount(self):

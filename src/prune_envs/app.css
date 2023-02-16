@@ -27,7 +27,6 @@ EnvironmentItem {
 
 #env_name {
     width: 2fr;
-    /* padding: 0 1; */
 }
 
 #env_ctime {
@@ -36,6 +35,14 @@ EnvironmentItem {
 
 #status {
     width: 1fr;
+}
+
+#spinner {
+    width: 3;
+}
+
+#status_msg {
+    width: auto;
 }
 
 .delete {
