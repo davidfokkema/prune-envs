@@ -7,6 +7,7 @@ from rich.spinner import Spinner
 from textual.app import App, ComposeResult, Screen
 from textual.containers import Horizontal
 from textual.widgets import Footer, Label, ListItem, ListView, Static
+from textual.css.query import NoMatches
 
 
 class EnvironmentsList(ListView):
@@ -48,11 +49,15 @@ class EnvironmentItem(ListItem):
             self.timer = self.set_interval(1 / 60, self.update_progress)
 
     def update_progress(self) -> None:
-        self.query_one("#spinner").update(self._spinner)
-        if not self.delete_thread.is_alive():
-            self.query_one("#spinner").update()
-            self.query_one("#status_msg").update("Deleted")
-            self.timer.stop_no_wait()
+        try:
+            self.query_one("#spinner").update(self._spinner)
+            if not self.delete_thread.is_alive():
+                self.query_one("#spinner").update()
+                self.query_one("#status_msg").update("Deleted")
+                self.timer.stop_no_wait()
+        except NoMatches:
+            # during app shutdown, this method may still fire when child widgets are already destroyed
+            pass
 
     def on_unmount(self):
         if self.delete_thread:
