@@ -19,18 +19,23 @@ EnvironmentsList {
 }
 
 
-Environment {
-    width: 1fr;
+EnvironmentItem {
+    width: 100%;
     layout: horizontal;
     padding: 1 2;
 }
 
 #env_name {
+    width: 2fr;
+    /* padding: 0 1; */
+}
+
+#env_ctime {
     width: 1fr;
 }
 
 #status {
-    width: 2fr;
+    width: 1fr;
 }
 
 .delete {

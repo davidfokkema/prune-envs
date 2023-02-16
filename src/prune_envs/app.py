@@ -1,5 +1,7 @@
+import pathlib
 import subprocess
 import threading
+import time
 
 from rich.progress import BarColumn, Progress, TextColumn
 from textual.app import App, ComposeResult, Screen
@@ -17,16 +19,19 @@ class EnvironmentsList(ListView):
         self.highlighted_child.delete()
 
 
-class Environment(ListItem):
+class EnvironmentItem(ListItem):
 
     delete_thread = None
 
-    def __init__(self, env_name: str) -> None:
+    def __init__(self, env: tuple) -> None:
         super().__init__()
-        self.env_name = env_name
+        self.env_name, self.env_ctime = env
 
     def compose(self) -> ComposeResult:
         yield Label(self.env_name, id="env_name")
+        yield Label(
+            time.strftime("%b %d, %Y", time.localtime(self.env_ctime)), id="env_ctime"
+        )
         yield Static(id="status")
 
     def delete(self) -> None:
@@ -79,7 +84,7 @@ class PruneEnvironments(App):
 
     def compose(self) -> ComposeResult:
         yield EnvironmentsList(
-            *[Environment(env) for env in self.envs],
+            *[EnvironmentItem(env) for env in self.envs],
         )
         yield Footer()
 
@@ -91,11 +96,15 @@ class PruneEnvironments(App):
         self.query_one("EnvironmentsList").remove()
         return await super().action_quit()
 
-    def get_environments(self) -> list[str]:
+    def get_environments(self) -> list[tuple]:
         process = subprocess.run("conda env list", shell=True, capture_output=True)
-        lines = process.stdout.decode().splitlines()
-        envs = [line.split()[0] for line in lines if line and line[0] != "#"]
-        envs.remove("base")
+        envs = []
+        for line in process.stdout.decode().splitlines():
+            if line and line[0] != "#":
+                env_name, *_, env_path = line.split()
+                if env_name != "base":
+                    ctime = pathlib.Path(env_path).stat().st_ctime
+                    envs.append((env_name, ctime))
         return envs
 
 
