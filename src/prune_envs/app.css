@@ -2,11 +2,13 @@ Screen {
     align: center middle;
 }
 
-#quit_dialog {
+#init_message,
+#quit_message {
     background: $accent-darken-3;
     width: auto;
     text-align: center;
     padding: 1 4;
+    color: $text;
     text-style: bold;
 }
 

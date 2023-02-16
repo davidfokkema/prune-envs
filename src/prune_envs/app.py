@@ -56,9 +56,14 @@ class Environment(ListItem):
             self.delete_thread.join()
 
 
+class InitScreen(Screen):
+    def compose(self) -> ComposeResult:
+        yield Static("Looking for conda environments...", id="init_message")
+
+
 class QuitScreen(Screen):
     def compose(self) -> ComposeResult:
-        yield Static("Waiting on running cleanups...", id="quit_dialog")
+        yield Static("Waiting on running cleanups...", id="quit_message")
 
 
 class PruneEnvironments(App):
@@ -67,10 +72,14 @@ class PruneEnvironments(App):
 
     BINDINGS = [("q", "quit", "Quit")]
 
+    async def on_compose(self):
+        await self.push_screen(InitScreen())
+        self.envs = self.get_environments()
+        self.pop_screen()
+
     def compose(self) -> ComposeResult:
-        envs = self.get_environments()
         yield EnvironmentsList(
-            *[Environment(env) for env in envs],
+            *[Environment(env) for env in self.envs],
         )
         yield Footer()
 
