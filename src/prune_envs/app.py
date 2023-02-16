@@ -8,7 +8,7 @@ from textual.widgets import Footer, Label, ListItem, ListView, Static
 
 class EnvironmentsList(ListView):
 
-    BINDINGS = [("d", "mark_deletion", "Toggle Delete/Undelete")]
+    BINDINGS = [("d", "mark_deletion", "Delete")]
 
     async def on_list_view_highlighted(self, highlighted: ListView.Highlighted) -> None:
         highlighted.item.parent.parent.scroll_to_widget(highlighted.item, animate=False)
