@@ -11,7 +11,7 @@ class EnvironmentsList(ListView):
     BINDINGS = [("d", "mark_deletion", "Toggle Delete/Undelete")]
 
     async def on_list_view_highlighted(self, highlighted: ListView.Highlighted) -> None:
-        highlighted.item.parent.parent.scroll_to_widget(highlighted.item)
+        highlighted.item.parent.parent.scroll_to_widget(highlighted.item, animate=False)
 
     def action_mark_deletion(self) -> None:
         self.highlighted_child.delete()
