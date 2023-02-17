@@ -16,7 +16,7 @@ def get_environments() -> list[tuple]:
 
 def remove_environment(name):
     subprocess.run(
-        f"conda env remove -n {name} --dry-run",
+        f"conda env remove -n {name}",
         shell=True,
         capture_output=True,
     )
