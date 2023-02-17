@@ -10,10 +10,12 @@ packages = [{include = "prune_envs", from = "src"}]
 python = "^3.10"
 textual = "^0.11.0"
 
-
 [tool.poetry.group.dev.dependencies]
 textual = {version = "^0.11.0", extras = ["dev"]}
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+prune-envs = "prune_envs.app:main"

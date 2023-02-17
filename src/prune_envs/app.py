@@ -102,6 +102,10 @@ class PruneEnvironments(App):
         return await super().action_quit()
 
 
-if __name__ == "__main__":
+def main():
     app = PruneEnvironments()
     app.run()
+
+
+if __name__ == "__main__":
+    main()
