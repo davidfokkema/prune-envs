@@ -1,8 +1,7 @@
-import subprocess
-import threading
 import time
 
 from rich.spinner import Spinner
+from textual import work
 from textual.app import App, ComposeResult, Screen
 from textual.containers import Horizontal
 from textual.css.query import NoMatches
@@ -28,6 +27,7 @@ class EnvironmentItem(ListItem):
     def __init__(self, env: tuple) -> None:
         super().__init__()
         self.env_name, self.env_ctime = env
+        self.update_timer = self.set_interval(1 / 60, self.update_progress, pause=True)
 
     def compose(self) -> ComposeResult:
         yield Label(self.env_name, id="env_name")
@@ -36,32 +36,28 @@ class EnvironmentItem(ListItem):
         )
         yield Horizontal(Static(id="status_msg"), Static(id="spinner"), id="status")
 
-    def delete(self) -> None:
+    @work()
+    async def delete(self) -> None:
         if not "delete" in self.classes:
             self.add_class("delete")
             self.query_one("#status_msg").update("Deleting")
 
-            self.delete_thread = threading.Thread(
-                target=conda.remove_environment,
-                args=(self.env_name,),
-            )
-            self.delete_thread.start()
-            self.timer = self.set_interval(1 / 60, self.update_progress)
+            self.update_timer.resume()
+            await conda.remove_environment(self.env_name)
+            self.update_timer.stop()
+            self.query_one("#spinner").update()
+            self.query_one("#status_msg").update("Deleted")
 
     def update_progress(self) -> None:
         try:
             self.query_one("#spinner").update(self._spinner)
-            if not self.delete_thread.is_alive():
-                self.query_one("#spinner").update()
-                self.query_one("#status_msg").update("Deleted")
-                self.timer.stop_no_wait()
         except NoMatches:
             # during app shutdown, this method may still fire when child widgets are already destroyed
             pass
 
-    def on_unmount(self):
-        if self.delete_thread:
-            self.delete_thread.join()
+    # def on_unmount(self):
+    #     if self.delete_thread:
+    #         self.delete_thread.join()
 
 
 class InitScreen(Screen):

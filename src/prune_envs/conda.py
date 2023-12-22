@@ -1,3 +1,4 @@
+import asyncio
 import pathlib
 import subprocess
 
@@ -17,9 +18,10 @@ def get_environments() -> list[tuple]:
     return envs
 
 
-def remove_environment(name):
-    subprocess.run(
+async def remove_environment(name):
+    process = await asyncio.create_subprocess_shell(
         f"conda env remove -n {name}",
-        shell=True,
-        capture_output=True,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT,
     )
+    await process.wait()
