@@ -12,7 +12,6 @@ from prune_envs import conda
 
 
 class EnvironmentsList(ListView):
-
     BINDINGS = [("d", "mark_deletion", "Delete")]
 
     async def on_list_view_highlighted(self, highlighted: ListView.Highlighted) -> None:
@@ -23,7 +22,6 @@ class EnvironmentsList(ListView):
 
 
 class EnvironmentItem(ListItem):
-
     delete_thread = None
     _spinner = Spinner(name="simpleDots")
 
@@ -77,8 +75,7 @@ class QuitScreen(Screen):
 
 
 class PruneEnvironments(App):
-
-    CSS_PATH = "app.css"
+    CSS_PATH = "app.tcss"
 
     BINDINGS = [("q", "quit", "Quit")]
 
