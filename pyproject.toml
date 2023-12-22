@@ -8,10 +8,10 @@ packages = [{include = "prune_envs", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-textual = "^0.11.0"
+textual = "^0.46.0"
 
 [tool.poetry.group.dev.dependencies]
-textual = {version = "^0.11.0", extras = ["dev"]}
+textual-dev = "^1.3.0"
 
 [build-system]
 requires = ["poetry-core"]
