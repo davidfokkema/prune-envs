@@ -21,7 +21,7 @@ class EnvironmentsList(ListView):
 
 
 class EnvironmentItem(ListItem):
-    delete_thread = None
+    delete_worker = None
     _spinner = Spinner(name="simpleDots")
 
     def __init__(self, env: tuple) -> None:
@@ -36,28 +36,38 @@ class EnvironmentItem(ListItem):
         )
         yield Horizontal(Static(id="status_msg"), Static(id="spinner"), id="status")
 
-    @work()
-    async def delete(self) -> None:
+    def delete(self) -> None:
         if not "delete" in self.classes:
             self.add_class("delete")
-            self.query_one("#status_msg").update("Deleting")
+            self.delete_worker = self.remove_environment()
 
-            self.update_timer.resume()
-            await conda.remove_environment(self.env_name)
-            self.update_timer.stop()
+    @work()
+    async def remove_environment(self) -> None:
+        self.query_one("#status_msg").update("Deleting")
+        self.update_timer.resume()
+
+        await conda.remove_environment(self.env_name)
+
+        self.update_timer.stop()
+        try:
             self.query_one("#spinner").update()
             self.query_one("#status_msg").update("Deleted")
+        except NoMatches:
+            # during app shutdown, this method may still fire when child widgets
+            # are already destroyed
+            pass
 
     def update_progress(self) -> None:
         try:
             self.query_one("#spinner").update(self._spinner)
         except NoMatches:
-            # during app shutdown, this method may still fire when child widgets are already destroyed
+            # during app shutdown, this method may still fire when child widgets
+            # are already destroyed
             pass
 
-    # def on_unmount(self):
-    #     if self.delete_thread:
-    #         self.delete_thread.join()
+    async def on_unmount(self):
+        if self.delete_worker:
+            await self.delete_worker.wait()
 
 
 class InitScreen(Screen):
@@ -90,9 +100,9 @@ class PruneEnvironments(App):
         self.screen.focus_next()
 
     async def action_quit(self) -> None:
-        await self.push_screen(QuitScreen())
         self.query_one("EnvironmentsList").remove()
-        return await super().action_quit()
+        await self.push_screen(QuitScreen())
+        await super().action_quit()
 
 
 def main():
