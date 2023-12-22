@@ -1,3 +1,4 @@
+import asyncio
 import time
 
 from rich.spinner import Spinner
@@ -21,6 +22,8 @@ class EnvironmentsList(ListView):
 
 
 class EnvironmentItem(ListItem):
+    app: "PruneEnvironments"
+
     delete_worker = None
     _spinner = Spinner(name="simpleDots")
 
@@ -46,7 +49,7 @@ class EnvironmentItem(ListItem):
         self.query_one("#status_msg").update("Deleting")
         self.update_timer.resume()
 
-        await conda.remove_environment(self.env_name)
+        await conda.remove_environment(self.env_name, lock=self.app.conda_lock)
 
         self.update_timer.stop()
         try:
@@ -82,8 +85,9 @@ class QuitScreen(Screen):
 
 class PruneEnvironments(App):
     CSS_PATH = "app.tcss"
-
     BINDINGS = [("q", "quit", "Quit")]
+
+    conda_lock = asyncio.Lock()
 
     async def on_compose(self):
         await self.push_screen(InitScreen())

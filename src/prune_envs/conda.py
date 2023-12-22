@@ -18,10 +18,11 @@ def get_environments() -> list[tuple]:
     return envs
 
 
-async def remove_environment(name):
-    process = await asyncio.create_subprocess_shell(
-        f"conda env remove -n {name}",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
-    )
-    await process.wait()
+async def remove_environment(name, lock):
+    async with lock:
+        process = await asyncio.create_subprocess_shell(
+            f"conda env remove -n {name}",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
+        )
+        await process.wait()
