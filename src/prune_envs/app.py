@@ -88,7 +88,7 @@ class WaitScreen(ModalScreen):
 
 class PruneEnvironments(App):
     CSS_PATH = "app.tcss"
-    BINDINGS = [("q", "quit", "Quit")]
+    BINDINGS = [("q", "quit", "Quit"), ("ctrl+s", "save_screenshot()", None)]
 
     conda_lock = asyncio.Lock()
 
@@ -114,6 +114,10 @@ class PruneEnvironments(App):
         self.query_one("EnvironmentsList").remove()
         await self.push_screen(WaitScreen("Waiting on running cleanups..."))
         await super().action_quit()
+
+    def action_save_screenshot(self) -> None:
+        path = self.save_screenshot()
+        self.notify(f"Screen saved to {path}")
 
 
 app = PruneEnvironments()
