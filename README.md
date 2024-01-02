@@ -8,7 +8,7 @@ for each and every environment you have lying around. You can also find out wher
 
 Now, there is another way, using a TUI! 
 
-![Screenshot of the terminal user interface](pruneenvironments_screenshot.svg)
+![Screenshot of the terminal user interface](https://raw.githubusercontent.com/davidfokkema/prune-envs/main/pruneenvironments_screenshot.svg)
 
 
 ## Installation and usage
