@@ -2,20 +2,30 @@ Screen {
     align: center middle;
 }
 
-#init_message,
-#quit_message {
-    background: $accent-darken-3;
-    width: auto;
-    text-align: center;
-    padding: 1 4;
+#modal_wait {
+    height: auto;
+    width: 60%;
+    border: hkey $secondary;
+    background: $panel;
+}
+
+#modal_wait #msg {
+    padding: 1 2;
     color: $text;
+}
+
+#modal_wait LoadingIndicator {
+    height: auto;
+}
+
+#instruction {
+    margin: 1 2;
     text-style: bold;
 }
 
 EnvironmentsList {
     width: 100%;
-    height: 100%;
-    margin: 2 2;
+    height: auto;
 }
 
 

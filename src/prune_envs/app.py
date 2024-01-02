@@ -3,10 +3,11 @@ import time
 
 from rich.spinner import Spinner
 from textual import work
-from textual.app import App, ComposeResult, Screen
-from textual.containers import Horizontal
+from textual.app import App, ComposeResult
+from textual.containers import Center, Horizontal, Vertical
 from textual.css.query import NoMatches
-from textual.widgets import Footer, Label, ListItem, ListView, Static
+from textual.screen import ModalScreen
+from textual.widgets import Footer, Label, ListItem, ListView, LoadingIndicator, Static
 
 from prune_envs import conda
 
@@ -73,14 +74,16 @@ class EnvironmentItem(ListItem):
             await self.delete_worker.wait()
 
 
-class InitScreen(Screen):
-    def compose(self) -> ComposeResult:
-        yield Static("Looking for conda environments...", id="init_message")
+class WaitScreen(ModalScreen):
+    def __init__(self, msg: str, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.msg = msg
 
-
-class QuitScreen(Screen):
     def compose(self) -> ComposeResult:
-        yield Static("Waiting on running cleanups...", id="quit_message")
+        with Vertical(id="modal_wait"):
+            with Center():
+                yield Label(self.msg, id="msg")
+            yield LoadingIndicator()
 
 
 class PruneEnvironments(App):
@@ -90,11 +93,15 @@ class PruneEnvironments(App):
     conda_lock = asyncio.Lock()
 
     async def on_compose(self):
-        await self.push_screen(InitScreen())
+        await self.push_screen(WaitScreen("Looking for conda environments..."))
         self.envs = conda.get_environments()
         self.pop_screen()
 
     def compose(self) -> ComposeResult:
+        with Center():
+            yield Label(
+                "Please select an environment and press 'D' to delete", id="instruction"
+            )
         yield EnvironmentsList(
             *[EnvironmentItem(env) for env in self.envs],
         )
@@ -105,12 +112,14 @@ class PruneEnvironments(App):
 
     async def action_quit(self) -> None:
         self.query_one("EnvironmentsList").remove()
-        await self.push_screen(QuitScreen())
+        await self.push_screen(WaitScreen("Waiting on running cleanups..."))
         await super().action_quit()
 
 
+app = PruneEnvironments()
+
+
 def main():
-    app = PruneEnvironments()
     app.run()
 
 
