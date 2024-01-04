@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "prune-envs"
-version = "0.1.0"
+version = "1.0.0"
 description = "Prune (conda) Environments"
 authors = ["David Fokkema <davidfokkema@icloud.com>"]
 readme = "README.md"
@@ -8,7 +8,7 @@ packages = [{ include = "prune_envs", from = "src" }]
 homepage = "https://github.com/davidfokkema/prune-envs"
 license = "GPL-3.0-or-later"
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
