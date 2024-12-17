@@ -4,10 +4,18 @@ import time
 from rich.spinner import Spinner
 from textual import work
 from textual.app import App, ComposeResult
-from textual.containers import Center, Horizontal, Vertical
+from textual.containers import Center, Horizontal, Vertical, VerticalScroll
 from textual.css.query import NoMatches
-from textual.screen import ModalScreen
-from textual.widgets import Footer, Label, ListItem, ListView, LoadingIndicator, Static
+from textual.screen import ModalScreen, Screen
+from textual.widgets import (
+    Footer,
+    Header,
+    Label,
+    ListItem,
+    ListView,
+    LoadingIndicator,
+    Static,
+)
 
 from prune_envs import conda
 
@@ -112,41 +120,42 @@ class WaitScreen(ModalScreen):
             yield LoadingIndicator()
 
 
+class MainScreen(Screen):
+    AUTO_FOCUS = EnvironmentsList
+
+    def compose(self) -> ComposeResult:
+        """Compose the main user interface showing a list of environments."""
+        yield Header()
+        yield Footer()
+        yield Label(
+            "Please select an environment and press 'D' to delete",
+            id="instructions",
+        )
+        with VerticalScroll():
+            yield EnvironmentsList(
+                *[EnvironmentItem(env) for env in self.app.envs],
+            )
+
+
 class PruneEnvironments(App[None]):
     """The main app class."""
 
     CSS_PATH = "app.tcss"
-    BINDINGS = [("q", "quit", "Quit"), ("ctrl+s", "save_screenshot()", None)]
 
     conda_lock = asyncio.Lock()
 
-    async def on_compose(self) -> None:
+    async def on_mount(self) -> None:
         """Compose the wait screen and load environments."""
         await self.push_screen(WaitScreen("Looking for conda environments..."))
         self.envs = conda.get_environments()
         self.pop_screen()
-
-    def compose(self) -> ComposeResult:
-        """Compose the main user interface showing a list of environments."""
-        with Center():
-            yield Label(
-                "Please select an environment and press 'D' to delete", id="instruction"
-            )
-        yield EnvironmentsList(
-            *[EnvironmentItem(env) for env in self.envs],
-        )
-        yield Footer()
+        self.push_screen(MainScreen())
 
     async def action_quit(self) -> None:
         """Run cleanup procedure on quitting the app."""
         self.query_one("EnvironmentsList").remove()
         await self.push_screen(WaitScreen("Waiting on running cleanups..."))
         await super().action_quit()
-
-    def action_save_screenshot(self) -> None:
-        """Save a screenshot and notify the user."""
-        path = self.save_screenshot()
-        self.notify(f"Screen saved to {path}")
 
 
 app = PruneEnvironments()

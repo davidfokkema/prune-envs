@@ -2,66 +2,69 @@ Screen {
     align: center middle;
 }
 
-#modal_wait {
-    height: auto;
-    width: 60%;
-    border: hkey $accent;
-    background: $panel;
+WaitScreen {
+    #modal_wait {
+        height: auto;
+        width: 60%;
+        border: hkey $accent;
+        background: $panel;
+    }
+
+    #modal_wait #msg {
+        padding: 1 2;
+        color: $text;
+    }
+
+    #modal_wait LoadingIndicator {
+        height: auto;
+    }
 }
 
-#modal_wait #msg {
-    padding: 1 2;
-    color: $text;
-}
+MainScreen {
+    #instructions {
+        width: 100%;
+        text-align: center;
+        margin: 1 2;
+        text-style: bold;
+    }
 
-#modal_wait LoadingIndicator {
-    height: auto;
-}
+    VerticalScroll {
+        width: 100%;
+    }
 
-#instruction {
-    margin: 1 2;
-    text-style: bold;
-}
+    EnvironmentItem {
+        layout: horizontal;
+        padding: 1 2;
+    }
 
-EnvironmentsList {
-    width: 100%;
-    height: auto;
-}
+    #env_name {
+        width: 2fr;
+    }
 
+    #env_ctime {
+        width: 1fr;
+    }
 
-EnvironmentItem {
-    width: 100%;
-    layout: horizontal;
-    padding: 1 2;
-}
+    #status {
+        width: 1fr;
+        height: auto;
 
-#env_name {
-    width: 2fr;
-}
+        #spinner {
+            width: 3;
+        }
+    
+        #status_msg {
+            width: auto;
+        }
+    }
 
-#env_ctime {
-    width: 1fr;
-}
+    .delete {
+        color: $error;
+        text-style: bold;
 
-#status {
-    width: 1fr;
-    height: auto;
-}
-
-#spinner {
-    width: 3;
-}
-
-#status_msg {
-    width: auto;
-}
-
-.delete {
-    color: $error;
-    text-style: bold;
-}
-
-.delete.--highlight {
-    color: $error-lighten-2;
-    background: $accent-darken-2;
+        &.-highlight {
+            color: $error-lighten-2;
+            background: $block-cursor-blurred-background;
+        }
+    }
 }
