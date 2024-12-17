@@ -5,7 +5,6 @@ from rich.spinner import Spinner
 from textual import on, work
 from textual.app import App, ComposeResult
 from textual.containers import Center, Horizontal, Vertical, VerticalScroll
-from textual.css.query import NoMatches
 from textual.message import Message
 from textual.screen import ModalScreen, Screen
 from textual.widgets import (
@@ -82,23 +81,13 @@ class EnvironmentItem(ListItem):
         await conda.remove_environment(self.env_name, lock=self.app.conda_lock)
 
         self.update_timer.stop()
-        try:
-            # update the spinner widget to an empty value
-            self.query_one("#spinner").update()
-            self.query_one("#status_msg").update("Deleted")
-        except NoMatches:
-            # during app shutdown, this method may still fire when child widgets
-            # are already destroyed
-            pass
+        # update the spinner widget to an empty value
+        self.query_one("#spinner").update()
+        self.query_one("#status_msg").update("Deleted")
 
     def update_progress(self) -> None:
         """Update the progress spinner."""
-        try:
-            self.query_one("#spinner").update(self._spinner)
-        except NoMatches:
-            # during app shutdown, this method may still fire when child widgets
-            # are already destroyed
-            pass
+        self.query_one("#spinner").update(self._spinner)
 
     async def wait_on_worker(self) -> None:
         """Wait for the worker to finish before shutdown."""
