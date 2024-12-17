@@ -5,7 +5,7 @@ Screen {
 #modal_wait {
     height: auto;
     width: 60%;
-    border: hkey $secondary;
+    border: hkey $accent;
     background: $panel;
 }
 
@@ -45,6 +45,7 @@ EnvironmentItem {
 
 #status {
     width: 1fr;
+    height: auto;
 }
 
 #spinner {
