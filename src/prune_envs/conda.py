@@ -39,7 +39,7 @@ async def remove_environment(name: str, lock: asyncio.Lock) -> None:
     """
     async with lock:
         process = await asyncio.create_subprocess_shell(
-            f"conda env remove -n {name}",
+            f"conda env remove -n {name} --yes",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
         )
