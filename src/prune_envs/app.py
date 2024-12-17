@@ -2,10 +2,11 @@ import asyncio
 import time
 
 from rich.spinner import Spinner
-from textual import work
+from textual import on, work
 from textual.app import App, ComposeResult
 from textual.containers import Center, Horizontal, Vertical, VerticalScroll
 from textual.css.query import NoMatches
+from textual.message import Message
 from textual.screen import ModalScreen, Screen
 from textual.widgets import (
     Footer,
@@ -69,7 +70,7 @@ class EnvironmentItem(ListItem):
             self.add_class("delete")
             self.delete_worker = self.remove_environment()
 
-    @work()
+    @work
     async def remove_environment(self) -> None:
         """Remove the conda environment.
 
@@ -99,7 +100,7 @@ class EnvironmentItem(ListItem):
             # are already destroyed
             pass
 
-    async def on_unmount(self):
+    async def wait_on_worker(self) -> None:
         """Wait for the worker to finish before shutdown."""
         if self.delete_worker:
             await self.delete_worker.wait()
@@ -121,6 +122,8 @@ class WaitScreen(ModalScreen):
 
 
 class MainScreen(Screen):
+    class ShutdownComplete(Message): ...
+
     AUTO_FOCUS = EnvironmentsList
 
     def compose(self) -> ComposeResult:
@@ -135,6 +138,12 @@ class MainScreen(Screen):
             yield EnvironmentsList(
                 *[EnvironmentItem(env) for env in self.app.envs],
             )
+
+    @work
+    async def shutdown(self):
+        for environment_item in self.query(EnvironmentItem):
+            await environment_item.wait_on_worker()
+        self.post_message(self.ShutdownComplete())
 
 
 class PruneEnvironments(App[None]):
@@ -153,8 +162,11 @@ class PruneEnvironments(App[None]):
 
     async def action_quit(self) -> None:
         """Run cleanup procedure on quitting the app."""
-        self.query_one("EnvironmentsList").remove()
+        self.query_one(MainScreen).shutdown()
         await self.push_screen(WaitScreen("Waiting on running cleanups..."))
+
+    @on(MainScreen.ShutdownComplete)
+    async def run_quit(self):
         await super().action_quit()
 
 
