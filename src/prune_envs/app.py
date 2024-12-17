@@ -65,7 +65,7 @@ class EnvironmentItem(ListItem):
 
     def delete(self) -> None:
         """Start deleting the conda environment."""
-        if not "delete" in self.classes:
+        if "delete" not in self.classes:
             self.add_class("delete")
             self.delete_worker = self.remove_environment()
 
@@ -111,6 +111,8 @@ class WaitScreen(ModalScreen):
 
 
 class MainScreen(Screen):
+    """The main screen of the app."""
+
     class ShutdownComplete(Message): ...
 
     AUTO_FOCUS = EnvironmentsList
