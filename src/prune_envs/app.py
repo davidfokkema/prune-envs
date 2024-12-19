@@ -140,6 +140,8 @@ class MainScreen(Screen):
 class PruneEnvironments(App[None]):
     """The main app class."""
 
+    BINDINGS = [("ctrl+q", "quit", "Quit")]
+
     CSS_PATH = "app.tcss"
 
     conda_lock = asyncio.Lock()
