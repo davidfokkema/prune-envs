@@ -122,7 +122,7 @@ class MainScreen(Screen):
         yield Header()
         yield Footer()
         yield Label(
-            "Please select an environment and press 'D' to delete",
+            "Please select an environment and press 'd' to delete",
             id="instructions",
         )
         with VerticalScroll():
